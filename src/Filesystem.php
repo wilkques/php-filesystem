@@ -532,6 +532,7 @@ class Filesystem implements \IteratorAggregate, \Countable
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return iterator_count($this->getIterator());
@@ -546,6 +547,7 @@ class Filesystem implements \IteratorAggregate, \Countable
      *
      * @throws \LogicException if the in() method has not been called
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if (1 === \count($this->dirs)) {
