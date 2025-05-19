@@ -480,7 +480,7 @@ class Filesystem implements \IteratorAggregate, \Countable
             }
         }
 
-        $this->dirs = array_reduce($resolvedDirs, function($carry, $item) {
+        $this->dirs = array_reduce($resolvedDirs, function ($carry, $item) {
             return array_merge($carry, $item);
         }, $this->dirs);
 
@@ -550,14 +550,10 @@ class Filesystem implements \IteratorAggregate, \Countable
     #[\ReturnTypeWillChange]
     public function getIterator()
     {
-        if (1 === \count($this->dirs)) {
-            return $this->searchInDirectory($this->dirs[0]);
-        }
-
         $iterator = new \AppendIterator();
 
         foreach ($this->dirs as $dir) {
-            $iterator->append(new \IteratorIterator(new \ArrayIterator($this->searchInDirectory($dir))));
+            $iterator->append(new \IteratorIterator($this->searchInDirectory($dir)));
         }
 
         return $iterator;
