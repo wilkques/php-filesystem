@@ -425,7 +425,7 @@ class Filesystem implements \IteratorAggregate, \Countable
      */
     public function directories($directory)
     {
-        $directories = [];
+        $directories = array();
 
         foreach ($this->in($directory) as $dir) {
             $directories[] = $dir->getPathname();
