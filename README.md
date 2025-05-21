@@ -8,7 +8,11 @@
 
 ## How to use
 ```php
-$filesystem = new \Wilkques\FileSystem;
+$filesystem = \Wilkques\FileSystem::make();
+
+// or
+
+$filesystem = filesystem();
 
 // create file & put content
 $filesystem->put('<file/to/path>', '<content>');
