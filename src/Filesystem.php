@@ -477,7 +477,7 @@ class Filesystem implements \IteratorAggregate, \Countable
      */
     public function in($dirs)
     {
-        $resolvedDirs = [];
+        $resolvedDirs = array();
 
         foreach ((array) $dirs as $dir) {
             if (is_dir($dir)) {
