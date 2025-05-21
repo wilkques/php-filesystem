@@ -17,6 +17,16 @@ class Filesystem implements \IteratorAggregate, \Countable
     /**
      * @return static
      */
+    public static function make()
+    {
+        $container = \Wilkques\Container\Container::getInstance();
+
+        return $container->make(__CLASS__);
+    }
+
+    /**
+     * @return static
+     */
     public function followLinks()
     {
         $this->followLinks = true;
