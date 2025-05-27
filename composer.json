@@ -9,6 +9,9 @@
         "wilkques/php-helper": "^5.13.0"
     },
     "autoload": {
+        "files": [
+            "src/helpers.php"
+        ],
         "psr-4": {
             "Wilkques\\Filesystem\\": "src/"
         }
