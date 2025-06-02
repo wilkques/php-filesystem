@@ -8,7 +8,7 @@
 
 ## How to use
 ```php
-$filesystem = \Wilkques\FileSystem::make();
+$filesystem = \Wilkques\Filesystem\FileSystem::make();
 
 // or
 
