@@ -15,5 +15,13 @@
         "psr-4": {
             "Wilkques\\Filesystem\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wilkques\\Filesystem\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
     }
 }
