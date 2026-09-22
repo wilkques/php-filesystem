@@ -80,9 +80,31 @@ class Filesystem implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Determine if the given path is readable.
+     *
+     * @param  string  $path
+     * @return bool
+     */
+    public function isReadable($path)
+    {
+        return is_readable($path);
+    }
+
+    /**
+     * Determine if the given path is writable.
+     *
+     * @param  string  $path
+     * @return bool
+     */
+    public function isWritable($path)
+    {
+        return is_writable($path);
+    }
+
+    /**
      * @param string $path
      * @param bool|false $lock
-     * 
+     *
      * @return string
      */
     public function get($path, $lock = false)
@@ -95,6 +117,60 @@ class Filesystem implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Require the given file once.
+     *
+     * @param  string  $path
+     * @param  array  $data
+     * @return mixed
+     */
+    public function getRequire($path, $data = array())
+    {
+        if ($this->isFile($path)) {
+            $requireClosure = function () use ($path, $data) {
+                extract($data, EXTR_SKIP);
+
+                return require $path;
+            };
+
+            return $requireClosure();
+        }
+
+        throw new \Exception("File does not exist at path {$path}.");
+    }
+
+    /**
+     * Require the given file once.
+     *
+     * @param  string  $path
+     * @param  array  $data
+     * @return static
+     */
+    public function requireOnce($path, $data = array())
+    {
+        $requireOnceClosure = function () use ($path, $data) {
+            extract($data, EXTR_SKIP);
+
+            require_once $path;
+        };
+
+        $requireOnceClosure();
+
+        return $this;
+    }
+
+    /**
+     * Get the hash of the file at the given path.
+     *
+     * @param  string  $path
+     * @param  string  $algorithm
+     * @return string
+     */
+    public function hash($path, $algorithm = 'md5')
+    {
+        return hash_file($algorithm, $path);
+    }
+
+    /**
      * Get the file size of a given file.
      *
      * @param  string  $path
@@ -103,6 +179,17 @@ class Filesystem implements \IteratorAggregate, \Countable
     public function size($path)
     {
         return filesize($path);
+    }
+
+    /**
+     * Get the file's last modification time.
+     *
+     * @param  string  $path
+     * @return int
+     */
+    public function lastModified($path)
+    {
+        return filemtime($path);
     }
 
     /**
@@ -264,6 +351,72 @@ class Filesystem implements \IteratorAggregate, \Countable
         }
 
         return substr(sprintf('%o', fileperms($path)), -4);
+    }
+
+    /**
+     * Extract the file name from a file path, without its extension.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function name($path)
+    {
+        return pathinfo($path, PATHINFO_FILENAME);
+    }
+
+    /**
+     * Extract the trailing name component from a file path.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function basename($path)
+    {
+        return pathinfo($path, PATHINFO_BASENAME);
+    }
+
+    /**
+     * Extract the parent directory from a file path.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function dirname($path)
+    {
+        return pathinfo($path, PATHINFO_DIRNAME);
+    }
+
+    /**
+     * Extract the file extension from a file path.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function extension($path)
+    {
+        return pathinfo($path, PATHINFO_EXTENSION);
+    }
+
+    /**
+     * Get the file type of a given file.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function type($path)
+    {
+        return filetype($path);
+    }
+
+    /**
+     * Get the mime-type of a given file.
+     *
+     * @param  string  $path
+     * @return string|false
+     */
+    public function mimeType($path)
+    {
+        return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
     }
 
     /**
@@ -436,6 +589,76 @@ class Filesystem implements \IteratorAggregate, \Countable
         }
 
         return $directories;
+    }
+
+    /**
+     * Find path names matching a given pattern.
+     *
+     * @param  string  $pattern
+     * @param  int  $flags
+     * @return array
+     */
+    public function glob($pattern, $flags = 0)
+    {
+        return glob($pattern, $flags);
+    }
+
+    /**
+     * Get an array of all files in a directory (not recursive).
+     *
+     * @param  string  $directory
+     * @param  bool  $hidden
+     * @return array
+     */
+    public function files($directory, $hidden = false)
+    {
+        $files = array();
+
+        foreach ($this->searchInDirectory($directory) as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            if (!$hidden && substr($file->getFilename(), 0, 1) === '.') {
+                continue;
+            }
+
+            $files[] = $file->getPathname();
+        }
+
+        sort($files);
+
+        return $files;
+    }
+
+    /**
+     * Get all of the files from the given directory (recursive).
+     *
+     * @param  string  $directory
+     * @param  bool  $hidden
+     * @return array
+     */
+    public function allFiles($directory, $hidden = false)
+    {
+        $files = array();
+
+        $iterator = new \RecursiveIteratorIterator($this->searchInDirectory($directory));
+
+        foreach ($iterator as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            if (!$hidden && substr($file->getFilename(), 0, 1) === '.') {
+                continue;
+            }
+
+            $files[] = $file->getPathname();
+        }
+
+        sort($files);
+
+        return $files;
     }
 
     /**
