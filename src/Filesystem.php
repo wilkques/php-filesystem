@@ -21,6 +21,10 @@ class Filesystem implements \IteratorAggregate, \Countable
     {
         $container = \Wilkques\Container\Container::getInstance();
 
+        if (!$container->bound(__CLASS__)) {
+            $container->singleton(__CLASS__);
+        }
+
         return $container->make(__CLASS__);
     }
 
