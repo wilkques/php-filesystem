@@ -15,6 +15,14 @@ class Filesystem implements \IteratorAggregate, \Countable
     protected $followLinks = false;
 
     /**
+     * @param bool $followLinks
+     */
+    public function __construct($followLinks = false)
+    {
+        $this->followLinks = $followLinks;
+    }
+
+    /**
      * @return static
      */
     public static function make()
