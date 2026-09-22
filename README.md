@@ -4,6 +4,8 @@
 [![Latest Stable Version](https://poser.pugx.org/wilkques/filesystem/v/stable)](https://packagist.org/packages/wilkques/filesystem)
 [![License](https://poser.pugx.org/wilkques/filesystem/license)](https://packagist.org/packages/wilkques/filesystem)
 
+English | [繁體中文](README_ZH.md)
+
 A local-filesystem helper for PHP — file/directory read, write, copy, move, delete, and scanning, kept compatible all the way back to **PHP 5.3**.
 
 ## Requirements
