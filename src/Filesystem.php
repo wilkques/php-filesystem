@@ -2,6 +2,9 @@
 
 namespace Wilkques\Filesystem;
 
+use Wilkques\Helpers\Arrays;
+use Wilkques\Helpers\Strings;
+
 class Filesystem implements \IteratorAggregate, \Countable
 {
     /**
@@ -637,7 +640,7 @@ class Filesystem implements \IteratorAggregate, \Countable
                 continue;
             }
 
-            if (!$hidden && substr($file->getFilename(), 0, 1) === '.') {
+            if (!$hidden && Strings::startsWith($file->getFilename(), '.')) {
                 continue;
             }
 
@@ -667,7 +670,7 @@ class Filesystem implements \IteratorAggregate, \Countable
                 continue;
             }
 
-            if (!$hidden && substr($file->getFilename(), 0, 1) === '.') {
+            if (!$hidden && Strings::startsWith($file->getFilename(), '.')) {
                 continue;
             }
 
@@ -735,9 +738,7 @@ class Filesystem implements \IteratorAggregate, \Countable
             }
         }
 
-        $this->dirs = array_reduce($resolvedDirs, function ($carry, $item) {
-            return array_merge($carry, $item);
-        }, $this->dirs);
+        $this->dirs = Arrays::merge($this->dirs, Arrays::collapse($resolvedDirs));
 
         return $this;
     }

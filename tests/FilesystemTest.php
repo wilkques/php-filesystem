@@ -363,6 +363,42 @@ class FilesystemTest extends TestCase
         $this->assertSame(array($rootB . '/sub2'), $dirsB);
     }
 
+    /**
+     * in() is the one place that deliberately DOES accumulate across calls
+     * (unlike directories()/files()/allFiles()) — it's the fluent entry
+     * point behind Countable/IteratorAggregate, meant for building up a
+     * combined multi-directory scan via chained in() calls. Exercises the
+     * Arrays::merge()/Arrays::collapse() combo powering that accumulation.
+     */
+    public function testInAccumulatesAcrossCallsAndPowersCountAndIterator()
+    {
+        $this->putFile('rootA/x.txt');
+        $this->putFile('rootB/y.txt');
+
+        $rootA = $this->tmpDir . '/rootA';
+        $rootB = $this->tmpDir . '/rootB';
+
+        $fs = $this->fs();
+
+        $fs->in($rootA);
+
+        $this->assertSame(1, count($fs));
+
+        $fs->in($rootB);
+
+        $this->assertSame(2, count($fs));
+
+        $names = array();
+
+        foreach ($fs as $entry) {
+            $names[] = $entry->getFilename();
+        }
+
+        sort($names);
+
+        $this->assertSame(array('x.txt', 'y.txt'), $names);
+    }
+
     public function testFilesNonRecursiveExcludesHiddenByDefault()
     {
         $this->putFile('a.txt');
