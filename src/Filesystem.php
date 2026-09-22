@@ -128,9 +128,9 @@ class Filesystem implements \IteratorAggregate, \Countable
                 }
             } catch (\Exception $e) {
             }
-        }
 
-        fclose($handle);
+            fclose($handle);
+        }
 
         return $contents;
     }
@@ -428,6 +428,10 @@ class Filesystem implements \IteratorAggregate, \Countable
         $directories = array();
 
         foreach ($this->in($directory) as $dir) {
+            if (!$dir->isDir()) {
+                continue;
+            }
+
             $directories[] = $dir->getPathname();
         }
 
