@@ -4,7 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/wilkques/filesystem/v/stable)](https://packagist.org/packages/wilkques/filesystem)
 [![License](https://poser.pugx.org/wilkques/filesystem/license)](https://packagist.org/packages/wilkques/filesystem)
 
-A local-filesystem helper for PHP, matching much of Laravel's `Illuminate\Filesystem\Filesystem` API (not the `Storage`/flysystem disk abstraction — this is purely local file operations), kept compatible all the way back to **PHP 5.3**.
+A local-filesystem helper for PHP — file/directory read, write, copy, move, delete, and scanning, kept compatible all the way back to **PHP 5.3**.
 
 ## Requirements
 
@@ -114,7 +114,7 @@ Every method below has a runnable example, taken from the test suite (`tests/Fil
 
 ### Lower-level directory-scanning machinery
 
-`directories()`/`files()`/`allFiles()` are the methods you'll normally reach for. They're built on a small, self-contained Finder-like layer (not `Illuminate\Filesystem\Filesystem` — this part is unique to this package):
+`directories()`/`files()`/`allFiles()` are the methods you'll normally reach for. They're built on a small, self-contained directory-scanning layer:
 
 | Method | Description |
 | --- | --- |
