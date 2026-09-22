@@ -592,7 +592,13 @@ class Filesystem implements \IteratorAggregate, \Countable
     {
         $directories = array();
 
-        foreach ($this->in($directory) as $dir) {
+        // Deliberately not built on in()/$dirs (like files()/allFiles()):
+        // in() accumulates into the shared $dirs property across calls, so
+        // on a shared/singleton Filesystem instance (see make()) an earlier
+        // unrelated directories() call from one consumer would still be
+        // sitting in $dirs and leak into a later, different consumer's
+        // results.
+        foreach ($this->searchInDirectory($directory) as $dir) {
             if (!$dir->isDir()) {
                 continue;
             }

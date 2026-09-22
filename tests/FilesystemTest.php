@@ -315,8 +315,7 @@ class FilesystemTest extends TestCase
 
     /**
      * Regression test: directories() used to return files alongside
-     * subdirectories (no isDir() filter), contradicting its name and
-     * Laravel's Filesystem::directories() semantics.
+     * subdirectories (no isDir() filter), contradicting its name.
      */
     public function testDirectoriesOnlyReturnsDirectories()
     {
@@ -335,6 +334,33 @@ class FilesystemTest extends TestCase
             array($this->tmpDir . '/sub1', $this->tmpDir . '/sub2'),
             $dirs
         );
+    }
+
+    /**
+     * Regression test: directories() used to be built on in()/$dirs, which
+     * accumulates into a shared property across calls instead of resetting.
+     * On a shared/singleton Filesystem instance (see testMakeReturnsThe
+     * SameSharedInstance) — e.g. one Filesystem injected into both a
+     * Console and a Config instance — an earlier directories() call for one
+     * root would still be sitting in $dirs and leak into a later,
+     * unrelated directories() call for a different root on the same
+     * instance.
+     */
+    public function testDirectoriesDoesNotLeakStateAcrossCallsOnSharedInstance()
+    {
+        $this->putFile('rootA/sub1/.keep');
+        $this->putFile('rootB/sub2/.keep');
+
+        $shared = $this->fs();
+
+        $rootA = $this->tmpDir . '/rootA';
+        $rootB = $this->tmpDir . '/rootB';
+
+        $dirsA = $shared->directories($rootA);
+        $dirsB = $shared->directories($rootB);
+
+        $this->assertSame(array($rootA . '/sub1'), $dirsA);
+        $this->assertSame(array($rootB . '/sub2'), $dirsB);
     }
 
     public function testFilesNonRecursiveExcludesHiddenByDefault()
