@@ -116,14 +116,23 @@ Container::getInstance()
 
 ### 較底層的目錄掃描機制
 
-`directories()`/`files()`/`allFiles()` 是平常會用到的方法。它們是建構在一個小型、獨立的目錄掃描機制之上：
+`directories()`/`files()`/`allFiles()` 是平常會用到的方法。這三個方法**只**建構在 `searchInDirectory()` 之上——刻意**不**建立在 `in()`（見下方）之上，這樣共用／單例的 `Filesystem` 實例（例如 `make()`/`filesystem()` 回傳的那個）就不會在不相關的呼叫者之間洩漏狀態：
 
 | 方法 | 說明 |
 | --- | --- |
-| `in($dirs)` | 解析一個或多個目錄／glob pattern，準備好供迭代（fluent，回傳 `$this`）。 |
 | `normalizeDir($dir)` | 去除目錄路徑結尾的斜線（`(s)ftp://` 這種 URL 除外）。 |
-| `searchInDirectory($dir)` | 取得單一目錄的 `RecursiveDirectoryIterator`，會遵循 `followLinks()` 的設定。 |
-| `count()` / `getIterator()` | `Filesystem` 實作了 `Countable`/`IteratorAggregate`，涵蓋 `in()` 準備好的內容，所以呼叫過 `in()` 之後可以直接 `count($fs)`、`foreach ($fs as $entry)`。 |
+| `searchInDirectory($dir)` | 取得單一目錄的 `RecursiveDirectoryIterator`，會遵循 `followLinks()` 的設定。無狀態——每次呼叫都是全新的 iterator，不會存任何東西在 `$this` 上。 |
+
+### `in()` —— 另一套獨立的、模仿 Symfony Finder 的 API
+
+`in($dirs)` 是使用 `Filesystem` 實例的另一種、選用的方式：不是呼叫一個回傳陣列的方法，而是先「登記」一個或多個目錄／glob pattern，再對實例本身做迭代。
+
+| 方法 | 說明 |
+| --- | --- |
+| `in($dirs)` | 解析一個或多個目錄／glob pattern，準備好供迭代（fluent，回傳 `$this`）。**會跨呼叫累加**——它是把結果 merge 進實例已登記的目錄清單，不是取代，所以呼叫 `in()` 兩次以上（或在共用實例上重複使用）會把每次呼叫登記的目錄全部合併進同一次掃描。 |
+| `count()` / `getIterator()` | `Filesystem` 實作了 `Countable`/`IteratorAggregate`，涵蓋 `in()` 準備好的內容，所以呼叫過 `in()` 之後可以直接 `count($fs)`、`foreach ($fs as $entry)`。**不會遞迴**——每個登記的目錄只會掃一層（跟 `files()` 一樣，不像 `allFiles()`）。 |
+
+因為 `in()` 的狀態是累加在實例上的，如果在 `make()`/`filesystem()` 回傳的共用實例上呼叫，很容易把目錄洩漏給不相關的呼叫者。建議用這套 API 時改用 `new Filesystem()`，或是確保在你呼叫 `in()` 到讀取結果之間，沒有其他人動到同一個實例。
 
 ## 測試
 

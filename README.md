@@ -116,14 +116,23 @@ Every method below has a runnable example, taken from the test suite (`tests/Fil
 
 ### Lower-level directory-scanning machinery
 
-`directories()`/`files()`/`allFiles()` are the methods you'll normally reach for. They're built on a small, self-contained directory-scanning layer:
+`directories()`/`files()`/`allFiles()` are the methods you'll normally reach for. All three are built directly on `searchInDirectory()` only — deliberately **not** on `in()` (see below), so a shared/singleton `Filesystem` instance (like the one `make()`/`filesystem()` returns) can't leak state between unrelated callers.
 
 | Method | Description |
 | --- | --- |
-| `in($dirs)` | Resolve one or more directories/glob patterns and stage them for iteration (fluent, returns `$this`). |
 | `normalizeDir($dir)` | Strip a trailing slash from a directory path (except `(s)ftp://` URLs). |
-| `searchInDirectory($dir)` | Get a `RecursiveDirectoryIterator` for a single directory, honoring `followLinks()`. |
-| `count()` / `getIterator()` | `Filesystem` implements `Countable`/`IteratorAggregate` over whatever `in()` staged, so `count($fs)` and `foreach ($fs as $entry)` work directly after calling `in()`. |
+| `searchInDirectory($dir)` | Get a `RecursiveDirectoryIterator` for a single directory, honoring `followLinks()`. Stateless — a fresh iterator every call, nothing stored on `$this`. |
+
+### `in()` — a separate, Symfony Finder-style API
+
+`in($dirs)` is a different, opt-in way to use a `Filesystem` instance: instead of calling a method that returns an array, you stage one or more directories/glob patterns and then iterate the instance itself.
+
+| Method | Description |
+| --- | --- |
+| `in($dirs)` | Resolve one or more directories/glob patterns and stage them for iteration (fluent, returns `$this`). **Accumulates across calls** — it merges into the instance's staged directory list instead of replacing it, so calling `in()` more than once (or reusing it on a shared instance) combines every call's directories into one scan. |
+| `count()` / `getIterator()` | `Filesystem` implements `Countable`/`IteratorAggregate` over whatever `in()` staged, so `count($fs)` and `foreach ($fs as $entry)` work directly after calling `in()`. **Not recursive** — each staged directory is scanned one level deep only (like `files()`, not like `allFiles()`). |
+
+Because `in()` accumulates on the instance, it's easy to leak directories between unrelated callers if you call it on the shared instance from `make()`/`filesystem()`. Prefer `new Filesystem()` for this API, or make sure nothing else touches the instance between your `in()` call(s) and reading the result.
 
 ## Testing
 
