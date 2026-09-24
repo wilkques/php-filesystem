@@ -109,7 +109,8 @@ Container::getInstance()
 | `cleanDirectory($directory)` | 清空目錄裡所有檔案與子目錄，保留目錄本身。 | `$fs->cleanDirectory('/tmp/dir'); // true` |
 | `directories($directory)` | 列出 `$directory` 底下第一層子目錄（不含檔案）。 | `$fs->directories('/tmp'); // ['/tmp/sub1', '/tmp/sub2']` |
 | `files($directory, $hidden = false)` | 列出 `$directory` 底下的檔案（非遞迴）；預設不含隱藏檔，`$hidden = true` 才會包含。 | `$fs->files('/tmp'); // ['/tmp/a.txt']` |
-| `allFiles($directory, $hidden = false)` | 遞迴列出 `$directory` 底下所有檔案。 | `$fs->allFiles('/tmp'); // ['/tmp/a.txt', '/tmp/sub/b.txt', ...]` |
+| `allFiles($directory, $hidden = false)` | 遞迴列出 `$directory` 底下所有檔案。整棵樹會被攤平成單一清單——不保留目錄結構。 | `$fs->allFiles('/tmp'); // ['/tmp/a.txt', '/tmp/sub/b.txt', ...]` |
+| `tree($directory, $hidden = false)` | 遞迴走訪 `$directory`，並**保留**目錄結構：檔案對應到完整路徑，子目錄對應到同樣結構的巢狀陣列。 | `$fs->tree('/tmp'); // ['a.txt' => '/tmp/a.txt', 'sub' => ['b.txt' => '/tmp/sub/b.txt']]` |
 | `glob($pattern, $flags = 0)` | `glob()` 包裝。 | `$fs->glob('/tmp/*.txt'); // ['/tmp/a.txt', '/tmp/b.txt']` |
 | `followLinks()` | 開啟這個實例目錄掃描時跟進符號連結（見上方說明）。 | `$fs->followLinks();` |
 | `make()` *（靜態方法）* | 透過 container 解析出共用的 `Filesystem` 實例。 | `Filesystem::make();` |

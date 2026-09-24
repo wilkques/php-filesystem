@@ -109,7 +109,8 @@ Every method below has a runnable example, taken from the test suite (`tests/Fil
 | `cleanDirectory($directory)` | Empty a directory of all files and subdirectories, keeping the directory itself. | `$fs->cleanDirectory('/tmp/dir'); // true` |
 | `directories($directory)` | List the immediate subdirectories of `$directory` (files are excluded). | `$fs->directories('/tmp'); // ['/tmp/sub1', '/tmp/sub2']` |
 | `files($directory, $hidden = false)` | List the files directly inside `$directory` (non-recursive); dotfiles excluded unless `$hidden = true`. | `$fs->files('/tmp'); // ['/tmp/a.txt']` |
-| `allFiles($directory, $hidden = false)` | List every file inside `$directory`, recursively. | `$fs->allFiles('/tmp'); // ['/tmp/a.txt', '/tmp/sub/b.txt', ...]` |
+| `allFiles($directory, $hidden = false)` | List every file inside `$directory`, recursively. Flattens the whole tree into a single list — directory structure is lost. | `$fs->allFiles('/tmp'); // ['/tmp/a.txt', '/tmp/sub/b.txt', ...]` |
+| `tree($directory, $hidden = false)` | Recursively walk `$directory`, **preserving** the directory structure: files map to their full path, subdirectories map to a nested array of the same shape. | `$fs->tree('/tmp'); // ['a.txt' => '/tmp/a.txt', 'sub' => ['b.txt' => '/tmp/sub/b.txt']]` |
 | `glob($pattern, $flags = 0)` | `glob()` wrapper. | `$fs->glob('/tmp/*.txt'); // ['/tmp/a.txt', '/tmp/b.txt']` |
 | `followLinks()` | Turn on symlink-following for this instance's directory scans (see above). | `$fs->followLinks();` |
 | `make()` *(static)* | Resolve the shared `Filesystem` instance via the container. | `Filesystem::make();` |

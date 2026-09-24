@@ -451,6 +451,63 @@ class FilesystemTest extends TestCase
         );
     }
 
+    public function testTreePreservesDirectoryStructure()
+    {
+        $this->putFile('a.txt');
+        $this->putFile('sub/b.txt');
+        $this->putFile('sub/deep/c.txt');
+
+        $fs = $this->fs();
+
+        $tree = $fs->tree($this->tmpDir);
+
+        // assertEquals, not assertSame: RecursiveDirectoryIterator's
+        // iteration order within a directory is filesystem-dependent, not
+        // guaranteed to be creation order, so the top-level (and any
+        // same-level) key order isn't stable across environments.
+        $this->assertEquals(
+            array(
+                'a.txt' => $this->tmpDir . '/a.txt',
+                'sub' => array(
+                    'b.txt' => $this->tmpDir . '/sub/b.txt',
+                    'deep' => array(
+                        'c.txt' => $this->tmpDir . '/sub/deep/c.txt',
+                    ),
+                ),
+            ),
+            $tree
+        );
+    }
+
+    public function testTreeExcludesHiddenByDefault()
+    {
+        $this->putFile('a.txt');
+        $this->putFile('.hidden');
+
+        $fs = $this->fs();
+
+        $this->assertEquals(
+            array('a.txt' => $this->tmpDir . '/a.txt'),
+            $fs->tree($this->tmpDir)
+        );
+    }
+
+    public function testTreeWithHiddenTrue()
+    {
+        $this->putFile('a.txt');
+        $this->putFile('.hidden');
+
+        $fs = $this->fs();
+
+        $this->assertEquals(
+            array(
+                '.hidden' => $this->tmpDir . '/.hidden',
+                'a.txt' => $this->tmpDir . '/a.txt',
+            ),
+            $fs->tree($this->tmpDir, true)
+        );
+    }
+
     public function testGlob()
     {
         $this->putFile('a.txt');

@@ -683,6 +683,34 @@ class Filesystem implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Get the files and directories within a given directory, recursively,
+     * preserving the directory structure (unlike allFiles(), which flattens
+     * the whole tree into a single list of file paths).
+     *
+     * @param  string  $directory
+     * @param  bool  $hidden
+     * @return array
+     */
+    public function tree($directory, $hidden = false)
+    {
+        $result = array();
+
+        foreach ($this->searchInDirectory($directory) as $item) {
+            if (!$hidden && Strings::startsWith($item->getFilename(), '.')) {
+                continue;
+            }
+
+            if ($item->isDir()) {
+                $result[$item->getBasename()] = $this->tree($item->getPathname(), $hidden);
+            } else {
+                $result[$item->getBasename()] = $item->getPathname();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Remove all of the directories within a given directory.
      *
      * @param  string  $directory
